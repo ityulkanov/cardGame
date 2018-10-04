@@ -3,3 +3,8 @@ language: python
     - "3.7"
   script:
     - pytest
+
+deploy:
+  - provider: pages
+    github_token: $GITHUB_TOKEN
+    skip_cleanup: true
