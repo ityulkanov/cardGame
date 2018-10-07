@@ -16,21 +16,21 @@ Give examples
 
 ### Installing
 
-A step by step series of examples that tell you how to get a development env running
-
-Say what the step will be
-
+Запустить сервер flask (по дефолу на 5000 порту)
 ```
-Give the example
+...$python3 server.py
 ```
 
-And repeat
-
+Пример запросов к серверу с использованием библиотеки requests
+##### Логин пользователя
 ```
-until finished
-```
+import requests
 
-End with an example of getting some data out of the system or using it for a little demo
+url = 'http://localhost:5000'
+resp = requests.post(url + 'login', json={'login':'User1'})
+print(resp.text)
+```
+Подробное описание api находится в файле API.txt
 
 ## Running the tests
 
