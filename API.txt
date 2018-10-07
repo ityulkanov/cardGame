@@ -1,0 +1,61 @@
+login/
+    метод:
+        POST
+    параметры:
+        login   : тип - (str), имя пользователя
+    ответ:
+        json    : 200 {"status":"success"}              - пользователь создан
+                  400 {"status":"login already used"}   - логин уже занят
+
+
+create-game/
+    метод:
+        POST
+    пармаетры:
+        login   : тип - (str), логин пользователя введеный при авторизации
+    ответ:
+        json    : 200 {"status":"ok"}           - игра создона
+                  400 {"status":"game is on"}   - игра уже создана
+                  400 {"status":"wrong login"}  - передан неверный логин
+	
+
+join-game/
+    метод:
+        -- // --
+    параметры:
+        -- // --
+    ответ:
+        json    : 200 {"status":"ok"}                   - пользователь добавлен к игре
+                  400 {"status":"game doesn't exist"}   - игра еще не создана
+                  400 {"status":"wrong login"}          - передан неверный логин
+                  400 {"status":"user already joined"}  - пользователь уже добавлен в игру
+
+
+state/
+    
+	resp = {"user": {"cards": ...,
+			         "money": ...,
+			         "bet": ...,
+			         "position": ...,
+			         "actions": [...],	
+			         "action": ...}
+		"users":[{...},{...}],
+		"turn_number": ...,
+		"active_player": ...,
+		"bank": ...,
+		"cards_availble": [...]}
+
+call/
+	resp = {"status":"ok"}
+	
+raise/
+	resp = {"status":"ok"}
+
+fold/
+	resp = {"status":"ok"}
+
+all-in/
+	resp = {"status":"ok"}
+
+check/
+	resp = {"status":"ok"}
