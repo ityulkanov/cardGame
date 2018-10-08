@@ -7,16 +7,16 @@ def assertIndex():
 	assert index() == "Hello world"
 
 # Arseny: did you run this? There is a syntax error! Function without "()"
-def assertLogin: 
+def assertLogin(): 
 	#this function to work requires user import, how do I test it the? same with the rest 	
 	assert login() == ""
 
 # Arseny: there is syntax error too
-def assertcreate_game:
+def assertcreate_game():
 	assert create_game() == ""
 
 # Arseny: and there
-def join_game: 
+def join_game(): 
 	assert join_game() == ""
 
 #Here is a testing block for models file
