@@ -36,6 +36,11 @@ class Game:
 
 class Users:
     def __init__(self):
+        # Arseny: Why you use double '_' symbol in name of object attr?
+        # Arseny: If you want to create "private" attribute
+        # Arseny: You should use `_users`
+        # Arseny: `__users` mean that it's a class attribute
+        # Arseny: But it's not
         self.__users = []
 
     def __repr__(self):
