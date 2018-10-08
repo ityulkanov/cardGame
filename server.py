@@ -5,6 +5,12 @@ from models import Users, User, Game, LoginException
 
 app = Flask(__name__)
 
+# Arseny: using global conditions like `users` and variables like `game`
+# Arseny: is a bad software design pattern. Using global variables like
+# Arseny: `game` is really bad. It's not solution is not scalable.
+# Arseny: What to use instead of this? For example try create new class 
+# Arseny: Which inherit `Flask`. Add to this properties for `users` and
+# Arseny: `game`
 users = Users()
 game = None
 
@@ -20,6 +26,8 @@ def login():
     except LoginException as err: 
         return make_response(jsonify(status=err.message), 400)
 
+    # Arseny: better practice for logging is using module `logging`
+    # Arseny: from python standart library
     print(users)
 
     return jsonify(status="ok")
