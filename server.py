@@ -89,7 +89,21 @@ def state():
     if not app.users.user_exist(request.json['login']):
         return make_response(jsonify(status='wrong login'), 400)
 
-    return make_response(json.dumps(app.game, default=lambda o: o.__dict__),200)
+    active_user = app.users.get_user(request.json['login']).__dict__
+
+    users = [user.__dict__ for user in app.game.users]
+    for user_n, user in enumerate(users):
+        if user['login'] == active_user['login']:
+            users.pop(user_n)
+        else:
+            user['cards'] = 'XX'
+
+    game = app.game.__dict__
+    game['user'] = active_user
+    game['users'] = users
+
+    print(game)
+    return make_response(jsonify(game),200)
 
 
 app.run()

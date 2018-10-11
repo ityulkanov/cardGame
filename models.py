@@ -31,6 +31,14 @@ class Game:
         return False
 
     def join_user(self, user):
+        if len(self.users) != 0:
+            max_pos = self.users[-1].position
+            if max_pos == 6:
+                raise Exception('game is full')
+        else:
+            max_pos = 0
+
+        user.position = max_pos + 1
         self.users.append(user)
 
 
@@ -42,6 +50,11 @@ class Users:
         # Arseny: `__users` mean that it's a class attribute
         # Arseny: But it's not
         self._users = []
+
+    @property
+    def all_users(self):
+        return self._users
+    
 
     def __repr__(self):
         return self._users.__repr__()
