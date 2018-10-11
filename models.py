@@ -41,16 +41,16 @@ class Users:
         # Arseny: You should use `_users`
         # Arseny: `__users` mean that it's a class attribute
         # Arseny: But it's not
-        self.__users = []
+        self._users = []
 
     def __repr__(self):
-        return self.__users.__repr__()
+        return self._users.__repr__()
 
     def __str__(self):
-        return self.__users.__repr__()
+        return self._users.__repr__()
 
     def user_exist(self, login):
-        for user in self.__users:
+        for user in self._users:
             if user.login == login:
                 return True
 
@@ -61,13 +61,13 @@ class Users:
             raise LoginException('Login already exist')
 
         user = User(login=login)
-        self.__users.append(user)
+        self._users.append(user)
 
     def get_user(self,login):
         if not self.user_exist(login):
             return None
         
-        for user in self.__users:
+        for user in self._users:
             if user.login == login:            
                 return user
 
