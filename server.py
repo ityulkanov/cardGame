@@ -20,7 +20,6 @@ def index():
 
 @app.route('/login', methods=['POST'])
 def login():
-
     try:
         app.users.add_user(request.json['login'])
     except LoginException as err: 

@@ -83,4 +83,3 @@ class ClientError(Exception):
         super().__init__(message)
 
         self.message = message
-
