@@ -22,7 +22,12 @@ class Client:
         def dec(f):
             def wrap(*args, **kwargs):
                 self = args[0]
-                resp = requests.post(self._url + method, json={'login': self.login})
+                if len(args) == 2:
+                    data = args[1]
+                    resp = requests.post(self._url + method, json={'login': self.login, 'data': data})
+                else:
+                    resp = requests.post(self._url + method, json={'login': self.login})
+
                 if resp.status_code != 200:
                     raise ClientError(resp.json()['status'])
                 else:
@@ -59,7 +64,7 @@ class Client:
         return resp.json()['status']
 
     @api_method('rising')
-    def rising(self, resp):
+    def rising(self, data, resp):
         return resp.json()['status']
 
     @api_method('all-in')

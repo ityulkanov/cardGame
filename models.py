@@ -3,8 +3,7 @@ from dataclasses import dataclass, field
 
 @dataclass
 class User:
-    # shouldn't the login be called a name instead? Aren't we checking
-    # the uniqueness of that field to log the user in? 
+   
     login   : str
     cards   : list  = field(default_factory=list)
     money   : int   = 1000
