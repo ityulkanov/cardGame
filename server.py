@@ -101,7 +101,7 @@ def state():
     game['users'] = users
 
     print(game)
-    return make_response(jsonify(game),200)
+    return make_response(jsonify(status=game), 200)
 
 
 app.run()

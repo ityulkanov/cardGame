@@ -50,6 +50,10 @@ class Client:
         self.start_pooling()
         return resp.json()['status']
 
+    @api_method('state')
+    def get_state(self, resp):
+        return resp.json()
+
     @api_method('join-game')
     def join_game(self, resp):
         self.start_pooling()
@@ -91,11 +95,9 @@ class ClientPoolThread(threading.Thread):
         self.pooling = True
 
     def run(self):
-        i = 1
         while self.pooling:
-            # Fake request
-            self._client._state = 'WORK {0}'.format(i)
-            i += 1
+            # got to take care about safety sometime later on
+            self._client._state = self._client.get_state()
             time.sleep(1)
 
     def stop_pool(self):
