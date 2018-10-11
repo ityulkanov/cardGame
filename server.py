@@ -48,7 +48,7 @@ def create_game():
         return make_response(jsonify(status='game is already on'), 400)
 
 
-@app.route('/join-game',methods=['POST'])
+@app.route('/join-game', methods=['POST'])
 def join_game():
     if not app.users.user_exist(request.json['login']):
         return make_response(jsonify(status='wrong login'), 400)
