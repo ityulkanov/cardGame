@@ -1,7 +1,7 @@
+#!/usr/bin/python3
 import json
 from flask import Flask, request, make_response, jsonify
 from models import Users, User, Game, LoginException
-
 
 app = Flask(__name__)
 
@@ -31,7 +31,6 @@ def login():
     print(users)
 
     return jsonify(status="ok")
-
 
 @app.route('/create-game', methods=['POST'])
 def create_game():
