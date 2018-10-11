@@ -1,6 +1,3 @@
-<<<<<<< HEAD
-=======
-#I guess here shold be client side :) 
 import requests
 import threading
 import time
@@ -86,4 +83,4 @@ class ClientError(Exception):
         super().__init__(message)
 
         self.message = message
->>>>>>> d9f3ce6d2c7140fb6481ac32c9e1c59c4e96d434
+
