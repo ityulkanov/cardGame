@@ -60,7 +60,7 @@ state/
 call/
 	resp = {"status":"ok"}
 	
-raise/
+rising/
 	resp = {"status":"ok"}
 
 fold/

@@ -50,7 +50,20 @@ class Client:
     @api_method('ready')
     def ready(self,resp):
         return resp.json()['status']
+    @api_method('call')
+    def call(self, resp):
+		return res.json()['status']
 
+    @api_method('rising')
+    def rising(self, resp):
+    	return res.json()['status']
+
+    @api_method('all-in')
+    	return res.json()['status']
+    @api_method('check')
+    	return res.json()['status']
+
+    @api_method('all')
     def start_pooling(self):
         if self._state is None:
             self._pool.start()
@@ -58,6 +71,8 @@ class Client:
     def stop_pooling(self):
         self._pool.stop_pool()
         self._pool.join()
+
+    def call('')
 
 
 class ClientPoolThread(threading.Thread):
