@@ -1,7 +1,7 @@
+#!/usr/bin/python3
 import json
 from flask import Flask, request, make_response, jsonify
 from models import Users, User, Game, LoginException
-
 
 app = Flask(__name__)
 
@@ -20,7 +20,6 @@ def index():
 
 @app.route('/login', methods=['POST'])
 def login():
-
     try:
         app.users.add_user(request.json['login'])
     except LoginException as err: 
@@ -31,7 +30,6 @@ def login():
     print(app.users)
 
     return jsonify(status="ok")
-
 
 @app.route('/create-game', methods=['POST'])
 def create_game():
@@ -50,7 +48,7 @@ def create_game():
         return make_response(jsonify(status='game is already on'), 400)
 
 
-@app.route('/join-game',methods=['POST'])
+@app.route('/join-game', methods=['POST'])
 def join_game():
     if not app.users.user_exist(request.json['login']):
         return make_response(jsonify(status='wrong login'), 400)
@@ -103,7 +101,7 @@ def state():
     game['users'] = users
 
     print(game)
-    return make_response(jsonify(game),200)
+    return make_response(jsonify(status=game), 200)
 
 
 app.run()

@@ -1,8 +1,8 @@
-#I guess here shold be client side :) 
 import requests
 import threading
 import time
 import config
+
 
 class Client:
     def __init__(self):
@@ -20,18 +20,25 @@ class Client:
 
     def api_method(method):
         def dec(f):
-            def wrap(*args,**kwargs):
+            def wrap(*args, **kwargs):
                 self = args[0]
-                resp = requests.post(self._url + method, json={'login':self.login})
+                if len(args) == 2:
+                    data = args[1]
+                    resp = requests.post(self._url + method, json={'login': self.login, 'data': data})
+                else:
+                    resp = requests.post(self._url + method, json={'login': self.login})
+
                 if resp.status_code != 200:
                     raise ClientError(resp.json()['status'])
-                else:                    
-                    return f(*args,resp,**kwargs)
+                else:
+                    return f(*args, resp, **kwargs)
+
             return wrap
+
         return dec
 
     def log_in(self, login, resp=None):
-        resp = requests.post(self._url + 'login', json={'login':login})
+        resp = requests.post(self._url + 'login', json={'login': login})
         if resp.status_code != 200:
             raise ClientError(resp.json()['status'])
         else:
@@ -39,17 +46,37 @@ class Client:
             return resp.json()['status']
 
     @api_method('create-game')
-    def create_game(self,resp):
+    def create_game(self, resp):
         self.start_pooling()
         return resp.json()['status']
 
+    @api_method('state')
+    def get_state(self, resp):
+        return resp.json()
+
     @api_method('join-game')
-    def join_game(self,resp):
+    def join_game(self, resp):
         self.start_pooling()
         return resp.json()['status']
 
     @api_method('ready')
-    def ready(self,resp):
+    def ready(self, resp):
+        return resp.json()['status']
+
+    @api_method('call')
+    def call(self, resp):
+        return resp.json()['status']
+
+    @api_method('rising')
+    def rising(self, data, resp):
+        return resp.json()['status']
+
+    @api_method('all-in')
+    def all_in(self, resp):
+        return resp.json()['status']
+
+    @api_method('check')
+    def check(self, resp):
         return resp.json()['status']
 
     def start_pooling(self):
@@ -68,11 +95,9 @@ class ClientPoolThread(threading.Thread):
         self.pooling = True
 
     def run(self):
-        i = 1
         while self.pooling:
-            #Fake request
-            self._client._state = 'WORK {0}'.format(i)
-            i += 1
+            # got to take care about safety sometime later on
+            self._client._state = self._client.get_state()
             time.sleep(1)
 
     def stop_pool(self):
@@ -80,7 +105,7 @@ class ClientPoolThread(threading.Thread):
 
 
 class ClientError(Exception):
-    def __init__(self,message):
+    def __init__(self, message):
         super().__init__(message)
 
         self.message = message
