@@ -21,12 +21,11 @@ def index():
 @app.route('/login', methods=['POST'])
 def login():
     try:
-        app.users.add_user(request.json['login'])
+        user = User(request.json['login'])
+        app.users.add_user(user)
     except LoginException as err: 
         return make_response(jsonify(status=err.message), 400)
 
-    # Arseny: better practice for logging is using module `logging`
-    # Arseny: from python standart library
     print(app.users)
 
     return jsonify(status="ok")
@@ -77,9 +76,58 @@ def ready():
     if not app.game.user_joined(request.json['login']):
         return make_response(jsonify(status="user isn't joined"), 400)
 
-    user = app.users.get_user(request.json['login'])
+    user = app.game.users.get_user(request.json['login'])
     user.ready = True
-    return make_response(jsonify(status='ok'),200)
+
+    if app.game.all_users_ready() and app.game.users.users_count >= 2:
+        app.game.start_turn()
+
+    return make_response(jsonify(status='ok'), 200)
+
+
+@app.route('/rising', methods=['POST'])
+def rising():
+    #TODO: verification
+    user = app.game.users.get_user(request.json['login'])
+    rising_value = request.json['data']
+
+    if not user.money - rising_value >= 0:
+        return make_response(jsonify(status='not enough money'))
+
+    if rising_value - app.game.actual_bet < app.game.blind:
+        return make_response(jsonify(status='rise is small then blind'))
+
+    user.bet = rising_value
+    app.game.actual_bet = rising_value
+    app.game.next_player()
+
+    return make_response(jsonify(status='ok'), 200)
+
+
+@app.route('/call', methods=['POST'])
+def call():
+    #TODO: verification
+    user = app.game.users.get_user(request.json['login'])
+
+    if not user.money - user.bet >= app.game.actual_bet:
+        return make_response(jsonify(status='not enough money'), 400)
+
+    user.bet = app.game.actual_bet
+    app.game.next_player()
+
+    return make_response(jsonify(status='ok'), 200)
+
+
+@app.route('/check', methods=['POST'])
+def check():
+    #TODO: create check functional
+    return make_response(jsonify(status='ok'), 200)
+
+
+@app.route('/fold', methods=['POST'])
+def fold():
+    #TODO: create fold functional
+    return make_response(jsonify(status='ok'), 200)
 
 
 @app.route('/state', methods=['POST'])
@@ -87,16 +135,16 @@ def state():
     if not app.users.user_exist(request.json['login']):
         return make_response(jsonify(status='wrong login'), 400)
 
-    active_user = app.users.get_user(request.json['login']).__dict__
+    active_user = app.users.get_user(request.json['login']).__dict__.copy()
 
-    users = [user.__dict__ for user in app.game.users]
-    for user_n, user in enumerate(users):
-        if user['login'] == active_user['login']:
-            users.pop(user_n)
-        else:
-            user['cards'] = 'XX'
+    users = [user.__dict__.copy() for user in app.game.users]
+    users = list(filter(lambda x: x['login'] != active_user['login'], users))
 
-    game = app.game.__dict__
+    if app.game.game_status == 'ON':
+        for user in users:
+            user['cards'] = ['X','X']
+
+    game = app.game.__dict__.copy()
     game['user'] = active_user
     game['users'] = users
 

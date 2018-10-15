@@ -18,12 +18,15 @@ class Client:
         else:
             return 'not log on yet'
 
-    def api_method(method):
+    def api_method(method, with_data=False):
         def dec(f):
             def wrap(*args, **kwargs):
                 self = args[0]
-                if len(args) == 2:
-                    data = args[1]
+                if with_data:
+                    try:
+                        data = args[1]
+                    except IndexError:
+                        raise ClientError('this function need data')
                     resp = requests.post(self._url + method, json={'login': self.login, 'data': data})
                 else:
                     resp = requests.post(self._url + method, json={'login': self.login})
@@ -31,13 +34,13 @@ class Client:
                 if resp.status_code != 200:
                     raise ClientError(resp.json()['status'])
                 else:
-                    return f(*args, resp, **kwargs)
+                    return f(self, resp, **kwargs)
 
             return wrap
 
         return dec
 
-    def log_in(self, login, resp=None):
+    def log_in(self, login):
         resp = requests.post(self._url + 'login', json={'login': login})
         if resp.status_code != 200:
             raise ClientError(resp.json()['status'])
@@ -52,7 +55,8 @@ class Client:
 
     @api_method('state')
     def get_state(self, resp):
-        return resp.json()
+        self._state = resp.json()
+        return 'ok'
 
     @api_method('join-game')
     def join_game(self, resp):
@@ -67,8 +71,8 @@ class Client:
     def call(self, resp):
         return resp.json()['status']
 
-    @api_method('rising')
-    def rising(self, data, resp):
+    @api_method('rising', with_data=True)
+    def rising(self, resp):        
         return resp.json()['status']
 
     @api_method('all-in')
@@ -91,13 +95,14 @@ class Client:
 class ClientPoolThread(threading.Thread):
     def __init__(self, client):
         super().__init__()
+        self.deamon = True
         self._client = client
         self.pooling = True
 
     def run(self):
         while self.pooling:
             # got to take care about safety sometime later on
-            self._client._state = self._client.get_state()
+            self._client.get_state()
             time.sleep(1)
 
     def stop_pool(self):
