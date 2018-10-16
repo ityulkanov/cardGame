@@ -1,3 +1,6 @@
 pytest>=3.4
 pytest-xdist>=1.22
 pytest-cov>=2.4.0
+Flask==0.10.1
+requests>=0.1
+pillow>=0.1

@@ -8,9 +8,5 @@ install:
 
   script: python test.py
 
-deploy:
-  - provider: pages
-    github_token: $GITHUB_TOKEN
-    skip_cleanup: true
 on:
   branch: master
