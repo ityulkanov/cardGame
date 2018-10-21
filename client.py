@@ -83,6 +83,10 @@ class Client:
     def check(self, resp):
         return resp.json()['status']
 
+    @api_method('fold')
+    def fold(self, resp):
+        return resp.json()['status']
+
     def start_pooling(self):
         if self._state is None:
             self._pool.start()

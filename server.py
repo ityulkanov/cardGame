@@ -5,14 +5,13 @@ from models import Users, User, Game, LoginException
 
 app = Flask(__name__)
 
-# Arseny: using global conditions like `users` and variables like `game`
-# Arseny: is a bad software design pattern. Using global variables like
-# Arseny: `game` is really bad. It's not solution is not scalable.
-# Arseny: What to use instead of this? For example try create new class 
-# Arseny: Which inherit `Flask`. Add to this properties for `users` and
-# Arseny: `game`
 app.users = Users()
 app.game = None
+
+def turn_validation(user):
+    if user.position != app.game.active_player:
+        return False
+    return True 
 
 @app.route('/')
 def index():
@@ -91,6 +90,9 @@ def rising():
     user = app.game.users.get_user(request.json['login'])
     rising_value = request.json['data']
 
+    if not turn_validation(user):
+        return make_response(jsonify(status='not your turn !'))
+
     if not user.money - rising_value >= 0:
         return make_response(jsonify(status='not enough money'))
 
@@ -98,6 +100,7 @@ def rising():
         return make_response(jsonify(status='rise is small then blind'))
 
     user.bet = rising_value
+    user.action = 'bet done'
     app.game.actual_bet = rising_value
     app.game.next_player()
 
@@ -109,10 +112,14 @@ def call():
     #TODO: verification
     user = app.game.users.get_user(request.json['login'])
 
+    if not turn_validation(user):
+        return make_response(jsonify(status='not your turn !'))
+
     if not user.money - user.bet >= app.game.actual_bet:
         return make_response(jsonify(status='not enough money'), 400)
 
     user.bet = app.game.actual_bet
+    user.action = 'bet done'
     app.game.next_player()
 
     return make_response(jsonify(status='ok'), 200)
@@ -120,13 +127,33 @@ def call():
 
 @app.route('/check', methods=['POST'])
 def check():
-    #TODO: create check functional
+    #TODO: create verification
+    user = app.game.users.get_user(request.json['login'])
+
+    if not turn_validation(user):
+        return make_response(jsonify(status='not your turn !'))
+
+    if app.game.actual_bet != 0:
+        return make_response(jsonify(status='U can not check !'))
+
+    user.action = 'bet done'
+    app.game.next_player()
+
     return make_response(jsonify(status='ok'), 200)
 
 
 @app.route('/fold', methods=['POST'])
 def fold():
-    #TODO: create fold functional
+    #TODO: create verification
+    user = app.game.users.get_user(request.json['login'])
+
+    if not turn_validation(user):
+        return make_response(jsonify(status='not your turn !'))
+
+    user.cards = []
+    user.action = 'fold'
+    app.game.next_player()
+
     return make_response(jsonify(status='ok'), 200)
 
 
@@ -147,6 +174,7 @@ def state():
     game = app.game.__dict__.copy()
     game['user'] = active_user
     game['users'] = users
+    game.pop('cards')
 
     print(game)
     return make_response(jsonify(status=game), 200)

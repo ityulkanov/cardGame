@@ -90,10 +90,18 @@ class Game:
     active_player   : int  = 0
     actual_bet      : int  = 0
     bank            : int  = 0
-    cards           : list = field(default_factory=lambda : [i for i in range(54)])
+    cards           : list = field(default_factory=list)
     cards_availble  : list = field(default_factory=list)
     game_status     : str  = 'wait'
     
+    @property
+    def active_player_count(self):
+        count = 0
+        for user in self.users:
+            if user.action != 'fold':
+                count += 1
+        return count
+
     def user_joined(self, login):
         return self.users.user_exist(login)
 
@@ -120,69 +128,114 @@ class Game:
 
     def start_turn(self):
         self.turn_number += 1
-        self.game_status = 'ON'
-        
+        self.actual_bet = 0
+        self.__reload_user_actions()
+
         if self.turn_number == 1:
+            self.cards_availble = []
+            self.__reload_cards()
             self.__deal_cards()
+            self.__switch_blinds()
         elif self.turn_number == 2:
             self.__deal_flop()
-
-        self.__switch_blinds()
+        elif self.turn_number == 3:
+            self.__deal_kicker()
+        elif self.turn_number == 4:
+            self.__deal_river()
 
     def next_player(self):
+        users_circle = self.users.users_circle
+        #в первом цикле ищем активного игрока
+        for user in users_circle:
+            if user.position == self.active_player:
+                #когда его нашли, продолжаем искать по кругу игрока который не фолданул
+                for next_user in users_circle:
+                    if next_user.action != 'fold':
+                        self.active_player = next_user.position
+                        break
+                break
+
         if self.__check_bets():
             self.__get_bets()
-            self.start_turn()
-
-        if self.active_player == self.users.users_count:
-            self.active_player = 1
-        else:
-            self.active_player += 1
+            if self.active_player_count > 1:
+                self.start_turn()
+            else:
+                self.turn_number = 0
+                self.actual_bet = 0
+                user = self.users[self.active_player - 1]
+                user.money += self.bank
+                self.bank = 0
+                self.start_turn()
 
     def __switch_blinds(self):
-        if self.turn_number == 1:
+        if self.game_status == 'wait':
+            self.game_status = 'on'
             self.users[0].role = 'small blind'
             self.users[0].bet  = self.blind
+            self.users[0].action = 'bet done'
             self.users[1].role = 'big blind'
             self.users[1].bet  = self.blind * 2
+            self.users[1].action = 'bet done'
             self.actual_bet = self.blind * 2
+            try:
+                self.users[2]
+                self.active_player = 3
+            except IndexError:
+                self.active_player = 1
         else:
-            for user in self.users.users_circle:
+            users_circle = self.users.users_circle
+            for user in users_circle:
                 if user.role == 'big blind':
                     user.role = 'small blind'
                     user.bet = self.blind
-                    user = next(self.users.users_circle)
+                    user.action = 'bet done'
+                    print(user)
+                    user = next(users_circle)
                     user.role = 'big blind'
                     user.bet = self.blind * 2
+                    user.action = 'bet done'
                     self.actual_bet = self.blind * 2
+                    print(user)
+                    user = next(users_circle)
+                    print(user)
+                    self.active_player = user.position
                     break
-        self.__set_active_player()
+
+    def __reload_cards(self):
+        self.cards = [i for i in range(52)]
+        random.shuffle(self.cards)
+        for user in self.users:
+            user.cards = []
 
     def __deal_cards(self):
         for user in self.users:
             for i in range(2):
-                random_card_num = random.randrange(len(self.cards))
-                random_card = self.cards.pop(random_card_num)
-                user.cards.append(random_card)
+                user.cards.append(self.cards.pop())
 
     def __deal_flop(self):
-        random_card_num = random.randrange(len(self.cards))
-        self.cards.pop(random_card_num)
+        #верхнюю карту просто сбрасывают
+        self.cards.pop()
         for i in range(3):
-            random_card_num = random.randrange(len(self.cards))
-            random_card = self.cards.pop(random_card_num)
-            self.cards_availble.append(random_card)
+            self.cards_availble.append(self.cards.pop())
 
-    def __set_active_player(self):
-        for user in self.users.users_circle:
-            if user.role == 'big blind':
-                user = next(self.users.users_circle)
-                self.active_player = user.position
-                break
+    def __deal_kicker(self):
+        #верхнюю карту просто сбрасывают
+        self.cards.pop()
+        self.cards_availble.append(self.cards.pop())
+
+    def __deal_river(self):
+        #верхнюю карту просто сбрасывают
+        self.cards.pop()
+        self.cards_availble.append(self.cards.pop())
+
+    def __reload_user_actions(self):
+        for user in self.users:
+            user.action = 'waiting'
 
     def __check_bets(self):
         for user in self.users:
-            if user.bet != self.actual_bet:
+            if (user.bet != self.actual_bet and user.action != 'fold') or \
+               user.action == 'waiting':
                 return False
 
         return True
