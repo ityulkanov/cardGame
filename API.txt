@@ -31,6 +31,18 @@ join-game/
                   400 {"status":"user already joined"}  - пользователь уже добавлен в игру
 
 
+ready/
+    метод:
+        -- // --
+    параметры:
+        -- // --
+    ответ:
+        json    : 200 {"status":"ok"}
+                  400 {"status":"wrong login"}
+                  400 {"status":"game doesn't exit"}
+                  400 {"status":"user isn't joined"}
+
+
 state/
     
 	resp = {"user": {"cards": ...,
@@ -48,7 +60,7 @@ state/
 call/
 	resp = {"status":"ok"}
 	
-raise/
+rising/
 	resp = {"status":"ok"}
 
 fold/
